@@ -1,0 +1,45 @@
+{
+  "name": "vue-shadertoy-player",
+  "version": "0.1.0",
+  "description": "基于 Vue 3 的 ShaderToy 单 pass shader 播放组件，只需传入 glsl 文件地址即可运行",
+  "type": "module",
+  "main": "./dist/vue-shadertoy-player.umd.cjs",
+  "module": "./dist/vue-shadertoy-player.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vue-shadertoy-player.js",
+      "require": "./dist/vue-shadertoy-player.umd.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "vue",
+    "shadertoy",
+    "webgl",
+    "glsl",
+    "component"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "vue": "^3.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.5.2",
+    "@vue/test-utils": "^2.4.3",
+    "happy-dom": "^12.10.3",
+    "typescript": "^5.3.3",
+    "vite": "^4.5.2",
+    "vite-plugin-dts": "^3.7.3",
+    "vitest": "^0.34.6",
+    "vue": "^3.3.13"
+  }
+}
