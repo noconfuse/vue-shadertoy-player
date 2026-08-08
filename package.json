@@ -24,6 +24,14 @@
     "component"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noconfuse/vue-shadertoy-player.git"
+  },
+  "bugs": {
+    "url": "https://github.com/noconfuse/vue-shadertoy-player/issues"
+  },
+  "homepage": "https://github.com/noconfuse/vue-shadertoy-player#readme",
   "scripts": {
     "build": "vite build",
     "dev": "vite",
