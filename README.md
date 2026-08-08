@@ -6,7 +6,7 @@
 
 - 🖼 声明式用法：组件属性指向 glsl 地址，即插即用
 - ⚡ WebGL2 + 全屏三角形渲染，性能开销极小
-- 🎨 自动上传 ShaderToy 标准 uniform（`iResolution` / `iTime` / `iTimeDelta` / `iMouse` / `iFrame`）
+- 🎨 遵循 ShaderToy 规范自动注入运行时 uniform（`iResolution` / `iTime` / `iTimeDelta` / `iMouse` / `iFrame`），你的 glsl 里直接使用变量名即可，无需手动声明与上传
 - 🖱 内置鼠标交互（按下拖动会更新 `iMouse`）
 - 🛡 编译错误通过 `error` 事件抛出，便于定位
 - 📦 TypeScript 类型声明，Vue 为 peerDependency，不打包进产物
@@ -82,7 +82,7 @@ player.dispose();
 
 ## Shader 编写约定
 
-单 pass 片段着色器，需包含以下入口函数（其余语法遵循 GLSL ES 3.00）：
+你只需编写 `mainImage` 函数体内的算法。组件在编译时会把你的代码嵌入一段预置的片段着色器模板，模板里已声明并由渲染循环自动上传以下 uniform —— **因此这些变量你不用 `uniform` 声明，也不用手动上传，直接在 `mainImage` 里使用即可**：
 
 ```glsl
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
@@ -92,15 +92,17 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 }
 ```
 
-可用内置 uniform：
+内置 uniform 说明：
 
-| uniform | 类型 | 说明 |
-| --- | --- | --- |
-| `iResolution` | `vec3` | 画布分辨率（`x, y, 1`） |
-| `iTime` | `float` | 从开始运行累计的秒数 |
-| `iTimeDelta` | `float` | 当前帧与上一帧的时间差（秒） |
-| `iMouse` | `vec4` | `(当前x, 当前y, 按下时的x, 按下时的y)`，坐标为设备像素 |
-| `iFrame` | `int` | 帧序号，从 0 开始 |
+| uniform | 类型 | 来源 | 说明 |
+| --- | --- | --- | --- |
+| `iResolution` | `vec3` | 组件上传 | 画布分辨率（`x, y, 1`） |
+| `iTime` | `float` | 组件上传 | 从开始运行累计的秒数 |
+| `iTimeDelta` | `float` | 组件上传 | 当前帧与上一帧的时间差（秒） |
+| `iMouse` | `vec4` | 组件上传 | `(当前x, 当前y, 按下时的x, 按下时的y)`，坐标为设备像素，y 轴从底部向上 |
+| `iFrame` | `int` | 组件上传 | 帧序号，从 0 开始 |
+
+如果你需要自定义 uniform（如纹理采样器、自定义参数），请在 `mainImage` 里自行声明和初始化，组件不会替你处理（避免与内置命名冲突，建议加前缀，例如 `u_myTexture`、`u_myParam`）。
 
 ## 开发
 
