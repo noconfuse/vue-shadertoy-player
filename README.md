@@ -84,13 +84,50 @@ player.dispose();
 
 你只需编写 `mainImage` 函数体内的算法。组件在编译时会把你的代码嵌入一段预置的片段着色器模板，模板里已声明并由渲染循环自动上传以下 uniform —— **因此这些变量你不用 `uniform` 声明，也不用手动上传，直接在 `mainImage` 里使用即可**：
 
+**示例一：彩虹脉冲圆环**（`examples/ripple.glsl`）
+
 ```glsl
-void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-    // fragCoord 为当前像素坐标，原点在左下角
-    // 例如一个随时间变化的渐变：
-    fragColor = vec4(fragCoord.xy / iResolution.xy, 0.5 + 0.5 * sin(iTime), 1.0);
+void mainImage(out vec4 col, in vec2 fragCoord) {
+    // 1. 把 fragCoord 归一化到 [-1, 1]，并按 iResolution.y 做宽高比修正
+    //    这样无论画布是宽是扁，圆形看起来都是真正的圆
+    vec2 uv = (fragCoord.xy - 0.5 * iResolution.xy) / iResolution.y;
+
+    // 2. 与画面中心的距离 d
+    float d = length(uv);
+
+    // 3. 半径 0.5 处的圆环：abs(d - 0.5) < 0.05 的区域亮
+    float ring = smoothstep(0.06, 0.05, abs(d - 0.5));
+
+    // 4. 颜色随角度循环（彩虹环），用 iTime 让色环缓慢转动
+    float a = atan(uv.y, uv.x);
+    vec3 hue = 0.5 + 0.5 * cos(iTime + a + vec3(0.0, 2.0, 4.0));
+
+    // 5. 深色背景 + 彩色圆环叠加
+    vec3 bg = vec3(0.05, 0.07, 0.12);
+    col = vec4(bg + hue * ring, 1.0);
 }
 ```
+
+**示例二：跟随鼠标的彩色光斑**（`examples/mouse-glow.glsl`，演示 `iMouse`）
+
+```glsl
+void mainImage(out vec4 col, in vec2 fragCoord) {
+    vec2 uv = fragCoord.xy / iResolution.xy;
+
+    // iMouse.xy 是当前鼠标的像素坐标，组件会自动上传
+    vec2 mouse = iMouse.xy / iResolution.xy;
+    float d = length(uv - mouse);
+
+    // 指数衰减：靠近鼠标处最亮
+    float glow = exp(-d * 20.0);
+
+    // 用 iTime + 坐标生成彩虹色
+    vec3 hue = 0.5 + 0.5 * cos(iTime * 2.0 + uv.xyx * 6.28);
+    col = vec4(hue * glow, 1.0);
+}
+```
+
+> ⚠️ **关于 `#version` / `precision` / `uniform` 声明**：以上代码**不要**写 `#version 300 es`、precision 声明和 `uniform vec3 iResolution;` 之类的语句——组件的 FS 模板会统一注入，写了反而会与模板产生语法冲突。
 
 内置 uniform 说明：
 
